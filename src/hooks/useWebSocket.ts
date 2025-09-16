@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useLogStore } from '../stores/logStore';
 import { LogEntry, FilterState } from '../types';
 
-const WEBSOCKET_URL = 'http://localhost:8081';
+const WEBSOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
 
 export const useWebSocket = () => {
   const socketRef = useRef<Socket | null>(null);

@@ -1,6 +1,6 @@
 import { LogEntry, LogStats, FilterState, FilterOptions, ExportOptions } from '../types';
 
-const API_BASE_URL = 'http://localhost:8081/api/logs';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/api/logs`;
 
 class ApiService {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
