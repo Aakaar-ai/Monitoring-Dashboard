@@ -28,6 +28,7 @@ import {
   FileText,
   AlertCircle
 } from 'lucide-react';
+import { ComingSoonOverlay } from '../components/ComingSoonOverlay';
 
 export const Security: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -143,7 +144,7 @@ export const Security: React.FC = () => {
     (selectedSeverity === 'all' || event.severity === selectedSeverity)
   );
 
-  return (
+  const securityContent = (
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
@@ -444,6 +445,15 @@ export const Security: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <ComingSoonOverlay 
+      title="Security Center Coming Soon"
+      description="Advanced security monitoring with threat detection, incident response, and comprehensive security analytics. Your digital fortress awaits!"
+    >
+      {securityContent}
+    </ComingSoonOverlay>
   );
 };
 

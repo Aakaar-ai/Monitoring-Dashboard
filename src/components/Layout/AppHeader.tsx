@@ -1,12 +1,26 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Wifi, WifiOff, Bell, User } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Wifi, WifiOff, Sun, Moon, User, LogOut, Settings } from 'lucide-react';
 import { useLogStore } from '../../stores/logStore';
 import { cn } from '../../utils/cn';
+import { Button } from '../ui/Button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { useTheme } from '../../hooks/useTheme';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const AppHeader: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { connectionStatus } = useLogStore();
+  const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
 
   const getPageTitle = () => {
     switch (location.pathname) {
@@ -30,41 +44,75 @@ export const AppHeader: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
+    <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 backdrop-blur-sm">
       <div className="flex items-center space-x-4">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{getPageTitle()}</h1>
+        <h1 className="text-xl font-semibold text-card-foreground">{getPageTitle()}</h1>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2">
         {/* Connection Status */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/50">
           {connectionStatus.isConnected ? (
             <Wifi className="w-4 h-4 text-green-500" />
           ) : (
-            <WifiOff className="w-4 h-4 text-red-500" />
+            <WifiOff className="w-4 h-4 text-destructive" />
           )}
           <span className={cn(
             'text-sm font-medium',
-            connectionStatus.isConnected ? 'text-green-600' : 'text-red-600'
+            connectionStatus.isConnected ? 'text-green-600 dark:text-green-400' : 'text-destructive'
           )}>
             {connectionStatus.isConnected ? 'Connected' : 'Disconnected'}
           </span>
-          {connectionStatus.clientCount && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              ({connectionStatus.clientCount} clients)
-            </span>
-          )}
         </div>
 
-        {/* Notifications */}
-        <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-          <Bell className="w-5 h-5" />
-        </button>
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          {theme === 'dark' ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+          <span className="sr-only">Toggle theme</span>
+        </Button>
 
         {/* User Menu */}
-        <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-          <User className="w-5 h-5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Toggle user menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? (
+                <Sun className="mr-2 h-4 w-4" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" />
+              )}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={async () => {
+              await logout();
+              navigate('/login');
+            }}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

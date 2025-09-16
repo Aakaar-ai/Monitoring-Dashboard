@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/input';
 import { 
   Zap, 
   Activity, 
@@ -14,26 +13,19 @@ import {
   MemoryStick,
   Network,
   Gauge,
-  Search,
   Filter,
   RefreshCw,
   Download,
-  Settings,
   BarChart3,
   AlertTriangle,
   CheckCircle,
   Info,
-  Server,
-  Database,
-  Globe,
-  Users,
-  FileText,
-  AlertCircle
+  Server
 } from 'lucide-react';
+import { ComingSoonOverlay } from '../components/ComingSoonOverlay';
 
 export const Performance: React.FC = () => {
   const [timeRange, setTimeRange] = React.useState('1h');
-  const [selectedMetric, setSelectedMetric] = React.useState('all');
 
   const performanceMetrics = [
     { name: 'CPU Usage', value: '65%', change: '+8.2%', trend: 'up', icon: Cpu, color: 'text-blue-600', status: 'normal' },
@@ -128,7 +120,7 @@ export const Performance: React.FC = () => {
     }
   };
 
-  return (
+  const performanceContent = (
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
@@ -454,6 +446,15 @@ export const Performance: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <ComingSoonOverlay 
+      title="Performance Monitoring Coming Soon"
+      description="Advanced performance analytics with real-time metrics, resource optimization, and comprehensive system monitoring. Peak performance awaits!"
+    >
+      {performanceContent}
+    </ComingSoonOverlay>
   );
 };
 

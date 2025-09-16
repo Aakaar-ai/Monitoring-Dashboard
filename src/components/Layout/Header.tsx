@@ -1,10 +1,12 @@
 import React from 'react';
-import { Sun, Moon, Wifi, WifiOff } from 'lucide-react';
+import { Sun, Moon, Wifi, WifiOff, LogOut, User } from 'lucide-react';
 import { useLogStore } from '../../stores/logStore';
+import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/Button';
 
 export const Header: React.FC = () => {
   const { theme, toggleTheme, connectionStatus } = useLogStore();
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
@@ -41,6 +43,15 @@ export const Header: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* User Info */}
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+            <User className="w-4 h-4" />
+            <span>{user?.email}</span>
+            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs font-medium">
+              Superuser
+            </span>
+          </div>
+
           <Button
             variant="ghost"
             size="sm"
@@ -52,6 +63,16 @@ export const Header: React.FC = () => {
             ) : (
               <Sun className="w-5 h-5" />
             )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </div>

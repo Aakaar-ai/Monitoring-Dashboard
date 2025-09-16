@@ -26,6 +26,7 @@ import {
   Shield,
   Users
 } from 'lucide-react';
+import { ComingSoonOverlay } from '../components/ComingSoonOverlay';
 
 export const Services: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -139,7 +140,7 @@ export const Services: React.FC = () => {
     (selectedStatus === 'all' || service.status === selectedStatus)
   );
 
-  return (
+  const servicesContent = (
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
@@ -409,6 +410,15 @@ export const Services: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <ComingSoonOverlay 
+      title="Service Management Coming Soon"
+      description="Comprehensive microservices monitoring with health tracking, deployment management, and service architecture visualization. Your infrastructure awaits!"
+    >
+      {servicesContent}
+    </ComingSoonOverlay>
   );
 };
 

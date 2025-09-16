@@ -23,6 +23,7 @@ import {
   Globe,
   Server
 } from 'lucide-react';
+import { ComingSoonOverlay } from '../components/ComingSoonOverlay';
 
 export const Analytics: React.FC = () => {
   const [timeRange, setTimeRange] = React.useState('24h');
@@ -52,7 +53,7 @@ export const Analytics: React.FC = () => {
     { metric: 'Network Latency', current: 12, previous: 18, unit: 'ms' }
   ];
 
-  return (
+  const analyticsContent = (
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
@@ -316,5 +317,14 @@ export const Analytics: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <ComingSoonOverlay 
+      title="Advanced Analytics Coming Soon"
+      description="Powerful analytics with real-time insights, interactive charts, performance metrics, and geographic distribution. Data-driven decisions await!"
+    >
+      {analyticsContent}
+    </ComingSoonOverlay>
   );
 };

@@ -1,14 +1,15 @@
-import React from 'react';
-import { X, Copy, ExternalLink, Calendar, Clock, User, Globe, AlertTriangle, Info, FileText } from 'lucide-react';
-import { LogEntry as LogEntryType } from '../../types';
+import React, { useState } from 'react';
+import { X, Copy, ExternalLink, Calendar, Clock, User, Globe, AlertTriangle, Info, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { LogEntry } from '../../types/log-entry';
 import { formatLogTimestamp } from '../../utils/dateUtils';
 import { getLogLevelColor } from '../../utils/logUtils';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 interface LogDetailModalProps {
-  log: LogEntryType | null;
+  log: LogEntry | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -61,9 +62,10 @@ export const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, isOpen, onC
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Basic Info */}
-            <div className="space-y-4">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Basic Info */}
+              <div className="space-y-4">
               {/* Level and Service */}
               <Card>
                 <CardHeader className="pb-3">
@@ -219,22 +221,68 @@ export const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, isOpen, onC
                 </Card>
               )}
 
-              {/* Stack Trace */}
-              {log.stack_trace && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-red-600 dark:text-red-400">
-                      Stack Trace
-                    </CardTitle>
+              </div>
+            </div>
+            
+            {/* Full Width Sections */}
+            {log.log_data && (
+              <Card className="w-full">
+                <Collapsible defaultOpen={false}>
+                  <CardHeader className="pb-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-lg transition-colors cursor-pointer">
+                    <CollapsibleTrigger className="w-full">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium flex items-center">
+                          <span>Log Data</span>
+                          <Badge variant="outline" className="ml-2">
+                            {typeof log.log_data === 'object' && log.log_data !== null 
+                              ? `${Object.keys(log.log_data).length} keys` 
+                              : '1 item'}
+                          </Badge>
+                        </CardTitle>
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
                   </CardHeader>
-                  <CardContent>
-                    <pre className="text-xs bg-red-50 dark:bg-red-900/20 p-3 rounded overflow-x-auto text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+                  <CollapsibleContent>
+                    <CardContent className="p-0">
+                      <div className="p-4">
+                        <JsonViewer data={log.log_data} />
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            )}
+            
+            {log.stack_trace && (
+              <Card className="w-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-red-600 dark:text-red-400">
+                    Stack Trace
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative">
+                    <div className="absolute top-2 right-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(log.stack_trace || '');
+                        }}
+                        className="h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity"
+                        title="Copy Stack Trace"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <pre className="text-xs bg-red-50 dark:bg-red-900/20 p-4 rounded overflow-x-auto text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
                       {log.stack_trace}
                     </pre>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
@@ -246,3 +294,154 @@ export const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, isOpen, onC
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ');
 }
+
+// Component to display JSON data with syntax highlighting
+const JsonViewer = ({ data }: { data: any }) => {
+  const [isExpanded, setIsExpanded] = useState<{ [key: string]: boolean }>({});
+  const [copied, setCopied] = useState(false);
+
+  const toggleExpand = (key: string) => {
+    setIsExpanded(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const renderValue = (value: any, key: string = '', depth: number = 0): React.ReactNode => {
+    const keyClass = 'text-blue-600 dark:text-blue-400';
+    const stringClass = 'text-green-600 dark:text-green-400';
+    const numberClass = 'text-purple-600 dark:text-purple-400';
+    const booleanClass = 'text-red-600 dark:text-red-400';
+    const nullClass = 'text-gray-500';
+    const bracketClass = 'text-gray-400';
+    const commaClass = 'text-gray-400';
+    const colonClass = 'text-gray-400';
+
+    if (value === null) {
+      return <span className={nullClass}>null</span>;
+    }
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return <span className={bracketClass}>[]</span>;
+      }
+
+      const isExpandedNode = isExpanded[key] !== false;
+      
+      return (
+        <div className="ml-4">
+          <span 
+            className="cursor-pointer flex items-center" 
+            onClick={() => toggleExpand(key)}
+          >
+            {isExpandedNode ? (
+              <ChevronDown className="w-4 h-4 mr-1" />
+            ) : (
+              <ChevronRight className="w-4 h-4 mr-1" />
+            )}
+            <span className={bracketClass}>[</span>
+            {!isExpandedNode && <span className="text-gray-400">...{value.length} items</span>}
+          </span>
+          
+          {isExpandedNode && (
+            <div className="ml-4">
+              {value.map((item, index) => (
+                <div key={index}>
+                  {renderValue(item, `${key}-${index}`, depth + 1)}
+                  {index < value.length - 1 && <span className={commaClass}>,</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {isExpandedNode && <span className={bracketClass}>]</span>}
+        </div>
+      );
+    }
+
+    if (typeof value === 'object') {
+      const keys = Object.keys(value);
+      if (keys.length === 0) {
+        return <span className={bracketClass}>{"{}"}</span>;
+      }
+
+      const isExpandedNode = isExpanded[key] !== false;
+      
+      return (
+        <div className="ml-4">
+          <span 
+            className="cursor-pointer flex items-center" 
+            onClick={() => toggleExpand(key)}
+          >
+            {isExpandedNode ? (
+              <ChevronDown className="w-4 h-4 mr-1" />
+            ) : (
+              <ChevronRight className="w-4 h-4 mr-1" />
+            )}
+            <span className={bracketClass}>{"{"}</span>
+            {!isExpandedNode && <span className="text-gray-400">...{keys.length} keys</span>}
+          </span>
+          
+          {isExpandedNode && (
+            <div className="ml-4">
+              {keys.map((k, i) => (
+                <div key={k}>
+                  <span className={keyClass}>"{k}"</span>
+                  <span className={colonClass}>: </span>
+                  {renderValue(value[k], `${key}-${k}`, depth + 1)}
+                  {i < keys.length - 1 && <span className={commaClass}>,</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {isExpandedNode && <span className={bracketClass}>{"}"}</span>}
+        </div>
+      );
+    }
+
+    if (typeof value === 'string') {
+      return <span className={stringClass}>"{value}"</span>;
+    }
+
+    if (typeof value === 'number') {
+      return <span className={numberClass}>{value}</span>;
+    }
+
+    if (typeof value === 'boolean') {
+      return <span className={booleanClass}>{value ? 'true' : 'false'}</span>;
+    }
+
+    return <span>{String(value)}</span>;
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute top-2 right-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={copyToClipboard}
+          className="h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity"
+          title="Copy JSON"
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
+      {copied && (
+        <div className="absolute top-2 right-10 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+          Copied!
+        </div>
+      )}
+      <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto text-sm font-mono">
+        <code>{renderValue(data, 'root')}</code>
+      </pre>
+    </div>
+  );
+};

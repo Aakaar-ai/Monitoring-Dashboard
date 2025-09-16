@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
-import { 
+import {
   Users as UsersIcon,
-  UserPlus, 
-  UserCheck, 
-  UserX, 
+  UserPlus,
+  UserCheck,
+  UserX,
   Search,
   Filter,
   RefreshCw,
@@ -27,6 +27,7 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
+import { ComingSoonOverlay } from '@/components/ComingSoonOverlay';
 
 export const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -34,7 +35,7 @@ export const Users: React.FC = () => {
   const [selectedRole, setSelectedRole] = React.useState('all');
 
   const userMetrics = [
-    { name: 'Total Users', value: '2,847', change: '+12.5%', trend: 'up', icon: Users, color: 'text-blue-600' },
+    { name: 'Total Users', value: '2,847', change: '+12.5%', trend: 'up', icon: UsersIcon, color: 'text-blue-600' },
     { name: 'Active Users', value: '2,134', change: '+8.3%', trend: 'up', icon: UserCheck, color: 'text-green-600' },
     { name: 'New Users', value: '156', change: '+23.1%', trend: 'up', icon: UserPlus, color: 'text-purple-600' },
     { name: 'Suspended Users', value: '23', change: '-5.2%', trend: 'down', icon: UserX, color: 'text-red-600' },
@@ -154,15 +155,17 @@ export const Users: React.FC = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    (user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     user.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (selectedStatus === 'all' || user.status === selectedStatus) &&
-    (selectedRole === 'all' || user.role === selectedRole)
+  const filteredUsers = React.useMemo(() =>
+    users.filter(user =>
+      (user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (selectedStatus === 'all' || user.status === selectedStatus) &&
+      (selectedRole === 'all' || user.role === selectedRole)
+    ), [searchQuery, selectedStatus, selectedRole]
   );
 
-  return (
-    <div className="p-6 space-y-6">
+  const UserContent = (
+    <div className="p-6 space-y-6 max-w-full overflow-x-hidden">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -202,8 +205,8 @@ export const Users: React.FC = () => {
               <div className="flex items-center mt-4">
                 <div className={`
                   flex items-center space-x-1 text-sm font-medium
-                  ${metric.trend === 'up' 
-                    ? 'text-green-600 dark:text-green-400' 
+                  ${metric.trend === 'up'
+                    ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
                   }
                 `}>
@@ -309,18 +312,18 @@ export const Users: React.FC = () => {
       {/* Search and Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+            <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search users by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-full lg:w-64"
                 />
               </div>
-              <div className="flex space-x-1">
+              <div className="flex flex-wrap gap-1">
                 {['all', 'active', 'inactive', 'suspended'].map((status) => (
                   <Button
                     key={status}
@@ -333,7 +336,7 @@ export const Users: React.FC = () => {
                   </Button>
                 ))}
               </div>
-              <div className="flex space-x-1">
+              <div className="flex flex-wrap gap-1">
                 {['all', 'admin', 'moderator', 'user'].map((role) => (
                   <Button
                     key={role}
@@ -347,22 +350,22 @@ export const Users: React.FC = () => {
                 ))}
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" className="flex items-center space-x-2">
                 <Filter className="w-4 h-4" />
-                <span>Filters</span>
+                <span className="hidden sm:inline">Filters</span>
               </Button>
               <Button variant="outline" size="sm" className="flex items-center space-x-2">
                 <Download className="w-4 h-4" />
-                <span>Export</span>
+                <span className="hidden sm:inline">Export</span>
               </Button>
               <Button variant="outline" size="sm" className="flex items-center space-x-2">
                 <RefreshCw className="w-4 h-4" />
-                <span>Refresh</span>
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
               <Button size="sm" className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700">
                 <UserPlus className="w-4 h-4" />
-                <span>Add User</span>
+                <span className="hidden sm:inline">Add User</span>
               </Button>
             </div>
           </div>
@@ -371,99 +374,109 @@ export const Users: React.FC = () => {
 
       {/* Users Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredUsers.map((user) => (
-          <Card key={user.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {user.avatar}
-                    </span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{user.name}</CardTitle>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge 
-                        variant="outline" 
-                        className={cn('text-xs', getRoleColor(user.role))}
-                      >
-                        {user.role}
-                      </Badge>
-                      <Badge 
-                        variant="outline" 
-                        className={cn('text-xs', getStatusColor(user.status))}
-                      >
-                        <div className="flex items-center space-x-1">
-                          {getStatusIcon(user.status)}
-                          <span className="capitalize">{user.status}</span>
-                        </div>
-                      </Badge>
-                      {user.isVerified && (
-                        <Badge variant="outline" className="text-xs text-green-600 bg-green-100 dark:bg-green-900/20">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Verified
+        {filteredUsers.length === 0 ? (
+          <div className="col-span-2 text-center py-12">
+            <UsersIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-500 dark:text-gray-400">No users found</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
+              Try adjusting your filters or search query
+            </p>
+          </div>
+        ) : (
+          filteredUsers.map((user) => (
+            <Card key={user.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                      <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                        {user.avatar}
+                      </span>
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{user.name}</CardTitle>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge
+                          variant="outline"
+                          className={cn('text-xs', getRoleColor(user.role))}
+                        >
+                          {user.role}
                         </Badge>
-                      )}
+                        <Badge
+                          variant="outline"
+                          className={cn('text-xs', getStatusColor(user.status))}
+                        >
+                          <div className="flex items-center space-x-1">
+                            {getStatusIcon(user.status)}
+                            <span className="capitalize">{user.status}</span>
+                          </div>
+                        </Badge>
+                        {user.isVerified && (
+                          <Badge variant="outline" className="text-xs text-green-600 bg-green-100 dark:bg-green-900/20">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Verified
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center space-x-1">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="View Profile">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit User">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Settings">
+                      <Settings className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="View Profile">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit User">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Settings">
-                    <Settings className="w-4 h-4" />
-                  </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Mail className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-400">{user.email}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Globe className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-400">{user.department} • {user.location}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-400">Joined: {user.joinDate}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-400">Last login: {user.lastLogin}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Activity className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-400">Login count: {user.loginCount}</span>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center space-x-2 text-sm">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">{user.email}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <Globe className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">{user.department} • {user.location}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Joined: {user.joinDate}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Last login: {user.lastLogin}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <Activity className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-400">Login count: {user.loginCount}</span>
-                </div>
-              </div>
 
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  User ID: {user.id}
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    User ID: {user.id}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" className="h-7 px-2">
+                      <Mail className="w-3 h-3 mr-1" />
+                      Message
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 px-2">
+                      <Activity className="w-3 h-3 mr-1" />
+                      Activity
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" className="h-7 px-2">
-                    <Mail className="w-3 h-3 mr-1" />
-                    Message
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-7 px-2">
-                    <Activity className="w-3 h-3 mr-1" />
-                    Activity
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* User Analytics Placeholder */}
@@ -490,6 +503,15 @@ export const Users: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+
+  return (
+    <ComingSoonOverlay
+      title="User Management Coming Soon"
+      description="Comprehensive user management with role-based access control, user activity tracking, and user authentication. Your users await!"
+    >
+      {UserContent}
+    </ComingSoonOverlay>
   );
 };
 

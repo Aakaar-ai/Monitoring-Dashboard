@@ -35,15 +35,15 @@ export const Dashboard: React.FC = () => {
   const getMetricColor = (metric: string) => {
     switch (metric) {
       case 'total':
-        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/20';
+        return 'text-chart-1 bg-chart-1/10';
       case 'error':
-        return 'text-red-600 bg-red-100 dark:bg-red-900/20';
+        return 'text-destructive bg-destructive/10';
       case 'warning':
-        return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
+        return 'text-chart-4 bg-chart-4/10';
       case 'info':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/20';
+        return 'text-chart-2 bg-chart-2/10';
       default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20';
+        return 'text-muted-foreground bg-muted/20';
     }
   };
 
@@ -54,8 +54,8 @@ export const Dashboard: React.FC = () => {
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="pb-2">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-8 bg-muted rounded w-3/4"></div>
               </CardHeader>
             </Card>
           ))}
@@ -69,8 +69,8 @@ export const Dashboard: React.FC = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Dashboard</h2>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
+          <p className="text-muted-foreground">
             Monitor your logging system performance and metrics
           </p>
         </div>
@@ -95,7 +95,7 @@ export const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.total || 0}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               All time log entries
             </p>
           </CardContent>
@@ -110,7 +110,7 @@ export const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.byLevel?.error || 0}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Critical issues detected
             </p>
           </CardContent>
@@ -125,7 +125,7 @@ export const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.byLevel?.warn || 0}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Potential issues
             </p>
           </CardContent>
@@ -140,7 +140,7 @@ export const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.byLevel?.info || 0}</div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               General information
             </p>
           </CardContent>
@@ -197,7 +197,7 @@ export const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {stats?.byService ? Object.keys(stats.byService).length : 0}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Currently monitored services
             </p>
           </CardContent>
@@ -211,7 +211,7 @@ export const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {stats?.byCategory ? Object.keys(stats.byCategory).length : 0}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Log categories in use
             </p>
           </CardContent>
@@ -225,7 +225,7 @@ export const Dashboard: React.FC = () => {
             <div className="text-2xl font-bold">
               {stats?.byHour ? Object.values(stats.byHour).reduce((a: number, b: number) => a + b, 0) : 0}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Logs in the last 24 hours
             </p>
           </CardContent>
