@@ -15,13 +15,13 @@ import { cn } from '../../utils/cn';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
   { name: 'Logs', href: '/logs', icon: FileText },
+  { name: 'Bidding Monitor', href: '/bidding-monitor', icon: BarChart },
   { name: 'Live Terminal', href: '/terminal', icon: Terminal },
   { name: 'Analytics', href: '/analytics', icon: Activity },
   { name: 'Services', href: '/services', icon: Database },
   { name: 'Security', href: '/security', icon: Shield },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Performance', href: '/performance', icon: Zap },
-  { name: 'Bidding Monitor', href: '/bidding-monitor', icon: BarChart },
 ];
 
 export const AppSidebar: React.FC = () => {

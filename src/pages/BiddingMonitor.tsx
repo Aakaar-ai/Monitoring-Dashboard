@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { CustomerRunsGroup } from '@/components/BiddingMonitor/CustomerRunsGroup';
 
 export const BiddingMonitor: React.FC = () => {
   // State management
@@ -41,7 +42,7 @@ export const BiddingMonitor: React.FC = () => {
   const fetchData = async (pageNumber = page) => {
     try {
       setLoading(true);
-      
+
       const [runsData, statsData, filterOptions] = await Promise.allSettled([
         apiService.getWorkflowRuns(pageNumber, 10, {
           startDate: dateRange.startDate,
@@ -89,6 +90,18 @@ export const BiddingMonitor: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const groupedRuns = React.useMemo(() => {
+    const groups: Record<string, WorkflowRun[]> = {};
+    runs.forEach(run => {
+      const customer = run.identifiers.customerName;
+      if (!groups[customer]) {
+        groups[customer] = [];
+      }
+      groups[customer].push(run);
+    });
+    return groups;
+  }, [runs]);
 
   useEffect(() => {
     fetchData(1); // Reset to first page when filters change
@@ -162,7 +175,13 @@ export const BiddingMonitor: React.FC = () => {
           )}
 
           {stats && <CustomerTable stats={stats} />}
-
+          {Object.entries(groupedRuns).map(([customer, customerRuns]) => (
+            <CustomerRunsGroup
+              key={customer}
+              customerName={customer}
+              runs={customerRuns}
+            />
+          ))}
           <Card>
             <CardHeader>
               <CardTitle>Workflow Runs</CardTitle>
