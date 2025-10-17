@@ -8,7 +8,8 @@ import {
   Shield,
   Users,
   Zap,
-  Terminal
+  Terminal,
+  BarChart
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 const navigation = [
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Security', href: '/security', icon: Shield },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Performance', href: '/performance', icon: Zap },
+  { name: 'Bidding Monitor', href: '/bidding-monitor', icon: BarChart },
 ];
 
 export const AppSidebar: React.FC = () => {

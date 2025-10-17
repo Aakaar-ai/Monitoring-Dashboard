@@ -1,6 +1,8 @@
+import { WorkflowRunsResponse, WorkflowStats } from '@/types/bidding';
 import { LogEntry, LogStats, FilterState, FilterOptions, ExportOptions } from '../types';
 
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/api/logs`;
+const WORKFLOW_RUNS_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/api/workflow-runs`;
 
 class ApiService {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -121,6 +123,101 @@ class ApiService {
 
     return response.blob();
   }
+
+  private async workflowRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    try {
+      const response = await fetch(`${WORKFLOW_RUNS_BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error(`Workflow API request failed: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  async getWorkflowRuns(
+    page = 1,
+    limit = 100,
+    filters?: {
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      status?: string;
+      workflowName?: string;
+      startDate?: string;
+      endDate?: string;
+      runId?: string;
+      customerName?: string;
+      campaignId?: string;
+      profileId?: string;
+      userId?: string;
+      minKeywords?: number;
+      maxKeywords?: number;
+      minCost?: number;
+      maxCost?: number;
+      parentRunId?: string;
+      isParentOnly?: boolean;
+      includeChildren?: boolean;
+      minDuration?: number;
+      maxDuration?: number;
+      hasErrors?: boolean;
+      inCooldown?: boolean;
+      hasCosts?: boolean;
+      minTotalCost?: number;
+      maxTotalCost?: number;
+    }
+  ): Promise<WorkflowRunsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      workflowName: 'biddingAgent', // Default workflow name
+    });
+  
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
+  
+    return this.workflowRequest('?' + params.toString());
+  }
+  
+  async getWorkflowStats(
+    filters?: {
+      startDate?: string;
+      endDate?: string;
+      customerName?: string;
+      workflowName?: string;
+    }
+  ): Promise<WorkflowStats> {
+    const params = new URLSearchParams({
+      workflowName: filters?.workflowName || 'biddingAgent',
+    });
+  
+    if (filters) {
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+      if (filters.customerName) params.append('customerName', filters.customerName);
+    }
+  
+    return this.workflowRequest('/stats?' + params.toString());
+  }
+  
+  async getWorkflowFilters(workflowName = 'biddingAgent'): Promise<FilterOptions> {
+    return this.workflowRequest('/filters?workflowName=' + workflowName);
+  }
+
 }
 
 export const apiService = new ApiService();

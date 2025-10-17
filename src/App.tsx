@@ -15,6 +15,7 @@ import { AppLayout } from './components/Layout/AppLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Logs } from './pages/Logs';
 import { Toaster } from './components/ui/sonner';
+import { BiddingMonitor } from './pages/BiddingMonitor';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/security" element={<Security />} />
                     <Route path="/users" element={<Users />} />
                     <Route path="/performance" element={<Performance />} />
+                    <Route path="/bidding-monitor" element={<BiddingMonitor />} />
                   </Routes>
                 </AppLayout>
               </ProtectedRoute>
