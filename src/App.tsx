@@ -16,6 +16,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Logs } from './pages/Logs';
 import { Toaster } from './components/ui/sonner';
 import { BiddingMonitor } from './pages/BiddingMonitor';
+import { DayParting } from './pages/DayParting';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ function App() {
                     <Route path="/users" element={<Users />} />
                     <Route path="/performance" element={<Performance />} />
                     <Route path="/bidding-monitor" element={<BiddingMonitor />} />
+                    <Route path="/day-parting" element={<DayParting />} />
                   </Routes>
                 </AppLayout>
               </ProtectedRoute>

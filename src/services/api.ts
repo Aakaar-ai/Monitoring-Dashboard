@@ -4,6 +4,24 @@ import { LogEntry, LogStats, FilterState, FilterOptions, ExportOptions } from '.
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/api/logs`;
 const WORKFLOW_RUNS_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/api/workflow-runs`;
 
+interface DayPartingAnalyticsFilters {
+  profileId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  campaignType?: string;
+  marketplace?: string;
+  advertiserId?: string;
+}
+
+interface DayPartingData {
+  data: {
+    summary: any;
+    hourlyTrends: any;
+    dailyTrends: any;
+    campaignTypeBreakdown: any;
+  };
+}
+
 class ApiService {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     try {
@@ -71,7 +89,7 @@ class ApiService {
 
   async getStats(filters?: Partial<FilterState>): Promise<LogStats> {
     const params = new URLSearchParams();
-    
+
     if (filters?.dateRange?.start) {
       params.append('startDate', filters.dateRange.start.toISOString());
     }
@@ -116,7 +134,7 @@ class ApiService {
     }
 
     const response = await fetch(`${API_BASE_URL}/logs/export?${params}`);
-    
+
     if (!response.ok) {
       throw new Error('Export failed');
     }
@@ -133,11 +151,11 @@ class ApiService {
         },
         ...options,
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       return await response.json();
     } catch (error) {
       console.error(`Workflow API request failed: ${endpoint}`, error);
@@ -181,7 +199,7 @@ class ApiService {
       limit: limit.toString(),
       workflowName: 'biddingAgent', // Default workflow name
     });
-  
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -189,10 +207,10 @@ class ApiService {
         }
       });
     }
-  
+
     return this.workflowRequest('?' + params.toString());
   }
-  
+
   async getWorkflowStats(
     filters?: {
       startDate?: string;
@@ -204,18 +222,31 @@ class ApiService {
     const params = new URLSearchParams({
       workflowName: filters?.workflowName || 'biddingAgent',
     });
-  
+
     if (filters) {
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
       if (filters.customerName) params.append('customerName', filters.customerName);
     }
-  
+
     return this.workflowRequest('/stats?' + params.toString());
   }
-  
+
   async getWorkflowFilters(workflowName = 'biddingAgent'): Promise<FilterOptions> {
     return this.workflowRequest('/filters?workflowName=' + workflowName);
+  }
+
+  async getDayPartingAnalytics(filters: DayPartingAnalyticsFilters): Promise<DayPartingData> {
+    const params = new URLSearchParams();
+
+    if (filters.profileId) params.append('profileId', filters.profileId);
+    if (filters.startDate) params.append('startDate', filters.startDate.toISOString().split('T')[0]);
+    if (filters.endDate) params.append('endDate', filters.endDate.toISOString().split('T')[0]);
+    if (filters.campaignType) params.append('campaignType', filters.campaignType);
+    if (filters.marketplace) params.append('marketplace', filters.marketplace);
+    if (filters.advertiserId) params.append('advertiserId', filters.advertiserId);
+
+    return this.request('/day-parting?' + params.toString());
   }
 
 }
