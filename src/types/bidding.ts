@@ -1,5 +1,5 @@
 export interface WorkflowMetrics {
-    totalLLMCost: number;
+    totalLLMCost?: number;
     totalBidHolds: number;
     totalKeywords: number;
     totalBidPauses: number;
@@ -9,6 +9,7 @@ export interface WorkflowMetrics {
     totalPromptTokens: number;
     totalActionsFailed: number;
     totalActionsCreated: number;
+    totalAmazonApiCalls?: number;
     totalCampaignsFailed: number;
     totalKeywordsSkipped: number;
     totalCampaignsSkipped: number;
@@ -16,8 +17,12 @@ export interface WorkflowMetrics {
     totalKeywordsProcessed: number;
     totalCampaignsCompleted: number;
     totalKeywordsInCooldown: number;
+    totalLLMInputCostMicros?: number;
+    totalLLMTotalCostMicros?: number;
     totalCampaignsInCooldown: number;
+    totalLLMOutputCostMicros?: number;
     averageProcessingTimePerCampaign: number;
+    totalLLMCalls?: number;
 }
 
 export interface BidChange {

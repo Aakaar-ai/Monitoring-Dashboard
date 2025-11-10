@@ -64,7 +64,7 @@ export const RunDetailsModal: React.FC<RunDetailsModalProps> = ({
             <div>
               <div className="text-sm text-muted-foreground">Cost</div>
               <div className="font-medium">
-                ${(run.metrics.totalLLMCost / 1000000).toFixed(2)}
+                ${((run.metrics.totalLLMTotalCostMicros || 0) / 1000000).toFixed(3)}
               </div>
             </div>
           </div>

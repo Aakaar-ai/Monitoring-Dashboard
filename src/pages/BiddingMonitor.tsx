@@ -91,6 +91,93 @@ export const BiddingMonitor: React.FC = () => {
     }
   };
 
+  // Filter stats to only include parent runs
+  const filteredStats = React.useMemo(() => {
+    if (!stats) return null;
+
+    // Create a copy of stats with filtered data
+    const parentOnlyStats = { ...stats };
+    
+    // Recalculate counts based on parent runs only
+    const parentRunsCount = runs.length;
+    const completedRuns = runs.filter(run => run.status === 'COMPLETED').length;
+    const failedRuns = runs.filter(run => run.status === 'FAILED').length;
+    const runningRuns = runs.filter(run => run.status === 'RUNNING').length;
+
+    parentOnlyStats.totalRuns = parentRunsCount;
+    parentOnlyStats.byStatus = {
+      COMPLETED: completedRuns,
+      FAILED: failedRuns,
+      RUNNING: runningRuns
+    };
+
+    // Recalculate time distribution based on parent runs only
+    const byHour: Record<string, number> = {};
+    const byDay: Record<string, number> = {};
+    const byMonth: Record<string, number> = {};
+
+    runs.forEach(run => {
+      const startDate = new Date(run.start_time);
+      const hour = startDate.getHours().toString();
+      const day = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      const month = startDate.toISOString().substring(0, 7); // YYYY-MM
+
+      byHour[hour] = (byHour[hour] || 0) + 1;
+      byDay[day] = (byDay[day] || 0) + 1;
+      byMonth[month] = (byMonth[month] || 0) + 1;
+    });
+
+    parentOnlyStats.timeDistribution = {
+      byHour,
+      byDay,
+      byMonth
+    };
+
+    // Recalculate byCustomer data based on parent runs only
+    const byCustomer: Record<string, { runs: number; keywords: number; actions: number; cost: number }> = {};
+    let totalKeywords = 0;
+    let totalActions = 0;
+    let totalCost = 0;
+    
+    runs.forEach(run => {
+      const customer = run.identifiers.customerName;
+      if (!byCustomer[customer]) {
+        byCustomer[customer] = {
+          runs: 0,
+          keywords: 0,
+          actions: 0,
+          cost: 0
+        };
+      }
+      
+      const keywords = run.metrics.totalKeywords || 0;
+      const actions = run.metrics.totalActionsCreated || 0;
+      const cost = run.metrics.totalLLMTotalCostMicros || 0;
+      
+      byCustomer[customer].runs += 1;
+      byCustomer[customer].keywords += keywords;
+      byCustomer[customer].actions += actions;
+      byCustomer[customer].cost += cost;
+      
+      // Add to totals
+      totalKeywords += keywords;
+      totalActions += actions;
+      totalCost += cost;
+    });
+
+    parentOnlyStats.byCustomer = byCustomer;
+    
+    // Update metrics with recalculated totals
+    parentOnlyStats.metrics = {
+      ...parentOnlyStats.metrics,
+      totalKeywords,
+      totalActionsCreated: totalActions,
+      totalLLMCost: totalCost
+    };
+
+    return parentOnlyStats;
+  }, [stats, runs]);
+
   const groupedRuns = React.useMemo(() => {
     const groups: Record<string, WorkflowRun[]> = {};
     runs.forEach(run => {
@@ -165,16 +252,16 @@ export const BiddingMonitor: React.FC = () => {
         <LoadingSkeleton />
       ) : (
         <>
-          {stats && <SummaryCards stats={stats} />}
+          {filteredStats && <SummaryCards stats={filteredStats} />}
 
-          {stats && (
+          {filteredStats && (
             <TimeDistributionChart
-              byHour={stats.timeDistribution.byHour}
-              byDay={stats.timeDistribution.byDay}
+              byHour={filteredStats.timeDistribution.byHour}
+              byDay={filteredStats.timeDistribution.byDay}
             />
           )}
 
-          {stats && <CustomerTable stats={stats} />}
+          {filteredStats && <CustomerTable stats={filteredStats} />}
           {Object.entries(groupedRuns).map(([customer, customerRuns]) => (
             <CustomerRunsGroup
               key={customer}

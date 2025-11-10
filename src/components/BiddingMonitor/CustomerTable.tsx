@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { WorkflowStats } from '@/types/bidding';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 
 interface CustomerTableProps {
   stats: WorkflowStats;
@@ -21,16 +20,14 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({ stats }) => {
           <TableHeader>
             <TableRow>
               <TableHead>Customer</TableHead>
-              <TableHead className="text-right">Total Runs</TableHead>
+              <TableHead className="text-right">Total Campaigns</TableHead>
               <TableHead className="text-right">Keywords</TableHead>
               <TableHead className="text-right">Actions</TableHead>
               <TableHead className="text-right">Cost</TableHead>
-              <TableHead className="text-right">Success Rate</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Object.entries(stats.byCustomer).map(([customer, data]) => {
-              const successRate = ((data.runs > 0 ? data.actions / data.runs : 0) * 100).toFixed(1);
               return (
                 <TableRow key={customer}>
                   <TableCell className="font-medium">{customer}</TableCell>
@@ -38,12 +35,7 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({ stats }) => {
                   <TableCell className="text-right">{data.keywords.toLocaleString()}</TableCell>
                   <TableCell className="text-right">{data.actions.toLocaleString()}</TableCell>
                   <TableCell className="text-right">
-                    ${(data.cost / 1000000).toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={Number(successRate) > 50 ? "default" : "secondary"}>
-                      {successRate}%
-                    </Badge>
+                    ${(data.cost / 1000000).toFixed(3)}
                   </TableCell>
                 </TableRow>
               );
@@ -55,12 +47,7 @@ export const CustomerTable: React.FC<CustomerTableProps> = ({ stats }) => {
               <TableCell className="text-right">{stats.metrics.totalKeywords.toLocaleString()}</TableCell>
               <TableCell className="text-right">{stats.metrics.totalActionsCreated.toLocaleString()}</TableCell>
               <TableCell className="text-right">
-                ${(stats.metrics.totalLLMCost / 1000000).toFixed(2)}
-              </TableCell>
-              <TableCell className="text-right">
-                <Badge variant="outline">
-                  {((stats.byStatus.COMPLETED / stats.totalRuns) * 100).toFixed(1)}%
-                </Badge>
+                ${((stats.metrics.totalLLMCost || 0) / 1000000).toFixed(3)}
               </TableCell>
             </TableRow>
           </TableBody>

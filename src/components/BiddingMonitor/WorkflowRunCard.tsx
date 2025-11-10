@@ -56,7 +56,7 @@ export const WorkflowRunCard: React.FC<WorkflowRunCardProps> = ({ run }) => {
             </div>
             <div className="text-sm">
               <span className="text-muted-foreground">Cost: </span>
-              ${(run.metrics.totalLLMCost / 1000000).toFixed(2)}
+              ${((run.metrics.totalLLMTotalCostMicros || 0) / 1000000).toFixed(3)}
             </div>
           </div>
         </CardContent>
