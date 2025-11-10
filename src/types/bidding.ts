@@ -97,6 +97,8 @@ export interface WorkflowStats {
         totalKeywords: number;
         totalActionsCreated: number;
         totalLLMCost: number;
+        totalLLMCalls?: number;
+        totalAmazonApiCalls?: number;
         averageRuntime: number;
     };
     timeDistribution: {

@@ -138,6 +138,8 @@ export const BiddingMonitor: React.FC = () => {
     let totalKeywords = 0;
     let totalActions = 0;
     let totalCost = 0;
+    let totalLLMCalls = 0;
+    let totalAmazonCalls = 0;
     
     runs.forEach(run => {
       const customer = run.identifiers.customerName;
@@ -153,6 +155,8 @@ export const BiddingMonitor: React.FC = () => {
       const keywords = run.metrics.totalKeywords || 0;
       const actions = run.metrics.totalActionsCreated || 0;
       const cost = run.metrics.totalLLMTotalCostMicros || 0;
+      const llmCalls = run.metrics.totalLLMCalls || 0;
+      const amazonCalls = run.metrics.totalAmazonApiCalls || 0;
       
       byCustomer[customer].runs += 1;
       byCustomer[customer].keywords += keywords;
@@ -163,6 +167,8 @@ export const BiddingMonitor: React.FC = () => {
       totalKeywords += keywords;
       totalActions += actions;
       totalCost += cost;
+      totalLLMCalls += llmCalls;
+      totalAmazonCalls += amazonCalls;
     });
 
     parentOnlyStats.byCustomer = byCustomer;
@@ -172,7 +178,9 @@ export const BiddingMonitor: React.FC = () => {
       ...parentOnlyStats.metrics,
       totalKeywords,
       totalActionsCreated: totalActions,
-      totalLLMCost: totalCost
+      totalLLMCost: totalCost,
+      totalLLMCalls: totalLLMCalls,
+      totalAmazonApiCalls: totalAmazonCalls
     };
 
     return parentOnlyStats;
